@@ -7,7 +7,7 @@ class Database
     private static function init()
     {
         if(!empty(self::$db)) return;
-        self::$db = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+        self::$db = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT);
         self::$db->set_charset(DB_CHARSET);
         self::$db->options(MYSQLI_OPT_INT_AND_FLOAT_NATIVE, 1);
     }
@@ -15,7 +15,6 @@ class Database
     public static function execute($query, $var_types_string, $params){
         Database::init();
         $stmt = self::$db->prepare($query);
-        $id = 2;
         $stmt->bind_param($var_types_string, ...$params);
         $stmt->execute();
         $result = $stmt->get_result();
