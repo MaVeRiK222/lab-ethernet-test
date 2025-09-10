@@ -11,6 +11,8 @@ Class ApiController {
     }
 
     public static function createUser($login, $pass, $email =''){}
+    public static function updateUser($id, $data){}
+    public static function deleteUser($id){}
 
     private static function getResponse ($data, $code){
         $response = ['code' => $code];
