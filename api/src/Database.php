@@ -37,6 +37,11 @@ class Database
                 $result = $stmt->insert_id;
                 self::exit();
                 return $result;
+            case('UPDATE'):
+            case('DELETE'):
+                $result = $stmt->affected_rows;
+                self::exit();
+                return $result;
         }
     }
 
