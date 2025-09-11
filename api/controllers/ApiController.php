@@ -23,8 +23,7 @@ class ApiController
         $hash_pass = password_hash($pass, PASSWORD_DEFAULT);
         $params = [$login, $hash_pass, $email];
         $result = Database::execute($sql_query, 'sss', $params);
-        echo $result->insert_id;
-        return ApiController::getResponse();
+        return ApiController::getResponse(['created_id' => $result], 201, 'Создание успешно');
     }
 
     public static function updateUser($id, $data)
@@ -33,6 +32,11 @@ class ApiController
 
     public static function deleteUser($id)
     {
+        $sql_query = 'DELETE FROM users WHERE id=?';
+        $params = [$id];
+        $affected_rows = Database::execute($sql_query, 'i', $params);
+        return $affected_rows > 0 ? ApiController::getResponse($affected_rows, 200, 'Удаление успешно'):
+            ApiController::getResponse($affected_rows, 200, 'Не было удалено ни одной строки');
     }
 
     public static function login($login, $hash_pass){
