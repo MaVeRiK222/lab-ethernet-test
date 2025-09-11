@@ -28,7 +28,7 @@ class Database
             throw new Exception("Execute failed: " . self::$db->error . " | Query: " . $query);
         }
         $query_type = strtoupper(strtok(trim($query), " "));
-        switch ($query_type) {
+        switch (mb_convert_case($query_type, MB_CASE_UPPER)) {
             case('SELECT'):
                 $result = $stmt->get_result();
                 self::exit();
