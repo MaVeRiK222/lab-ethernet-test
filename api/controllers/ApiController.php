@@ -1,5 +1,6 @@
 <?php
 require_once $_SERVER['DOCUMENT_ROOT'] . '/api/src/Database.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/api/auth/Token.php';
 
 class ApiController
 {
@@ -7,12 +8,11 @@ class ApiController
     public static function getUser($id)
     {
         if (is_numeric($id)) {
-            $sql_query = "SELECT * FROM users WHERE id=?";
+            $sql_query = "SELECT id, login, email FROM users WHERE id=?";
             $params = [$id];
-            $result = Database::execute($sql_query, 'i', $params, 'SELECT');
-            for ($user = array(); $data = $result->fetch_assoc(); $user[] = $data) ;
-            if(count($user)=== 1) $user = array_pop($user);
-            return ApiController::getResponse($user);
+            Database::getInstance();
+            $result = Database::execute($sql_query, 'i', $params);
+            return ApiController::getResponse($result);
         }
         return ApiController::getResponse(null, 400, 'id ресурса должен быть числом');
     }
@@ -22,7 +22,8 @@ class ApiController
         $sql_query = "INSERT INTO users (login, password_hash, email) VALUES (?, ?, ?)";
         $hash_pass = password_hash($pass, PASSWORD_DEFAULT);
         $params = [$login, $hash_pass, $email];
-        $result = Database::execute($sql_query, 'sss', $params, 'INSERT');
+        Database::getInstance();
+        $result = Database::execute($sql_query, 'sss', $params);
         return ApiController::getResponse(['created_id' => $result], 201, 'Создание успешно');
     }
 
@@ -65,7 +66,8 @@ class ApiController
         echo $sql_query;
         print_r($params);
         echo $var_types_string;
-        $affected_rows = Database::execute($sql_query, $var_types_string, $params, 'UPDATE');
+        Database::getInstance();
+        $affected_rows = Database::execute($sql_query, $var_types_string, $params);
         return $affected_rows > 0 ? ApiController::getResponse($affected_rows, 200, 'Изменение успешно'):
             ApiController::getResponse($affected_rows, 200, 'Не было изменено ни одной строки');
     }
@@ -74,13 +76,39 @@ class ApiController
     {
         $sql_query = 'DELETE FROM users WHERE id=?';
         $params = [$id];
+        Database::getInstance();
         $affected_rows = Database::execute($sql_query, 'i', $params);
         return $affected_rows > 0 ? ApiController::getResponse($affected_rows, 200, 'Удаление успешно'):
             ApiController::getResponse($affected_rows, 200, 'Не было удалено ни одной строки');
     }
 
-    public static function login($login, $hash_pass){
+    public static function login($login, $pass){
+        $sql_query = 'SELECT id, password_hash FROM users WHERE login = ?';
+        $params = [$login];
+        $var_types_string = 's';
+        Database::getInstance();
+        try {
+            $result = Database::execute($sql_query, $var_types_string, $params);
+        } catch(Exception $e){
+            echo ' Все плохо';
+        }
+        $verifyPass = false;
+        $result = array_pop($result);
 
+            $verifyPass |= password_verify($pass, $result['password_hash']);
+        if(!$verifyPass) return null;
+
+        $token = Token::generateToken();
+        Token::storeToken($token['hash_token'], $result['id'], $token['expires_at']);
+        return [
+            'user_id' => $result['id'],
+            'token' => $token['plain_token']
+        ];
+    }
+
+    public static function isUserAuth($token, $user_id){
+        if(empty($token) || empty($user_id)) return false;
+        return Token::isTokenValid($token, $user_id);
     }
 
     private static function getResponse($data = [], $code = 200, $message = '')
