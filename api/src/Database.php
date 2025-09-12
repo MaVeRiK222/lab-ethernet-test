@@ -2,53 +2,71 @@
 
 class Database
 {
-    private static $db;
+    protected static $instance = null;
 
-    private static function init()
+    private function __construct()
     {
-        if (!empty(self::$db)) return;
-        self::$db = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT);
-        self::$db->set_charset(DB_CHARSET);
-        self::$db->options(MYSQLI_OPT_INT_AND_FLOAT_NATIVE, 1);
+        if (self::$instance !== null) {
+            return self::$instance;
+        } else {
+            self::$instance = Database::init();
+        }
+    }
+
+    private static function init(){
+        $connect = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT);
+        $connect->set_charset(DB_CHARSET);
+        $connect->options(MYSQLI_OPT_INT_AND_FLOAT_NATIVE, 1);
+        return $connect;
+    }
+
+    private function __clone()
+    {
+    }
+
+    public static function getInstance()
+    {
+        if (self::$instance === null) self::$instance = Database::init();
+        return self::$instance;
     }
 
     public static function execute($query, $var_types_string, $params)
     {
-        Database::init();
-        $stmt = self::$db->prepare($query);
+        $stmt = self::$instance->prepare($query);
         if (!$stmt) {
-            throw new Exception("Prepare failed: " . self::$db->error . " | Query: " . $query);
+            throw new Exception("Prepare failed: " . self::$instance->error . " | Query: " . $query);
         }
         $stmt->bind_param($var_types_string, ...$params);
         if (!$stmt) {
-            throw new Exception("Bind param failed: " . self::$db->error . " | Query: " . $query);
+            throw new Exception("Bind param failed: " . self::$instance->error . " | Query: " . $query);
         }
         $stmt->execute();
         if (!$stmt) {
-            throw new Exception("Execute failed: " . self::$db->error . " | Query: " . $query);
+            throw new Exception("Execute failed: " . self::$instance->error . " | Query: " . $query);
         }
         $query_type = strtoupper(strtok(trim($query), " "));
         switch (mb_convert_case($query_type, MB_CASE_UPPER)) {
             case('SELECT'):
-                $result = $stmt->get_result();
-                self::exit();
-                return $result;
+                $response = $stmt->get_result();
+                for ($result = array(); $row = $response->fetch_assoc(); $result[] = $row) ;
+                break;
             case('INSERT'):
                 $result = $stmt->insert_id;
-                self::exit();
-                return $result;
+                break;
             case('UPDATE'):
             case('DELETE'):
                 $result = $stmt->affected_rows;
-                self::exit();
-                return $result;
+                break;
         }
+        $stmt->close();
+        return $result;
     }
 
-    private static function exit()
+    public static function exit()
     {
-        if (!empty(self::$db)) {
-            self::$db->close();
+        if (self::$instance !== null) {
+            self::$instance->close();
+            self::$instance = null;
         }
     }
 }
