@@ -1,6 +1,6 @@
 <?php
-require_once $_SERVER['DOCUMENT_ROOT'] . '/api/src/Database.php';
-require_once $_SERVER['DOCUMENT_ROOT'] . '/api/auth/Token.php';
+require_once __DIR__ . '/../src/Database.php';
+require_once __DIR__ . '/../auth/Token.php';
 
 class ApiController
 {
@@ -22,7 +22,6 @@ class ApiController
         $cant_create = false;
         $message = 'Такой пользователь уже существует.';
         if (self::isUserEmailExists($email)) {
-            echo 'Почта есть';
             $message .= " Смените почту.";
             $cant_create = true;
         }
@@ -76,13 +75,9 @@ class ApiController
                 }
             }
         }
-        echo is_string($params[0]) ? 'Да' : "Нет";
         $params[] = $id;
         $var_types_string .= 'i';
         $sql_query .= $update_string . "WHERE id=?";
-        echo $sql_query;
-        print_r($params);
-        echo $var_types_string;
         Database::getInstance();
         $affected_rows = Database::execute($sql_query, $var_types_string, $params);
         return $affected_rows > 0 ? ApiController::getResponse($affected_rows, 200, 'Изменение успешно') :
@@ -105,11 +100,7 @@ class ApiController
         $params = [$login];
         $var_types_string = 's';
         Database::getInstance();
-        try {
-            $result = Database::execute($sql_query, $var_types_string, $params);
-        } catch (Exception $e) {
-            echo ' Все плохо';
-        }
+        $result = Database::execute($sql_query, $var_types_string, $params);
         $verifyPass = false;
         $result = array_pop($result);
 
@@ -142,13 +133,11 @@ class ApiController
 
     private static function isUserEmailExists($email)
     {
-//        echo $email;
         $sql = "SELECT email FROM users WHERE email=?";
         $params = [$email];
         $var_types_string = 's';
         Database::getInstance();
         $result = Database::execute($sql, $var_types_string, $params);
-//        echo empty($result) ? 'Почты нет' : 'Почта есть';
         return !empty($result);
     }
 
