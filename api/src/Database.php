@@ -62,6 +62,10 @@ class Database
         return $result;
     }
 
+    public static function executeMigration($query){
+        $stmt = self::$instance->prepare($query);
+        $stmt->execute();
+    }
     public static function exit()
     {
         if (self::$instance !== null) {
