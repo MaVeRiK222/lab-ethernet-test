@@ -1,13 +1,13 @@
 <?php
-require_once $_SERVER['DOCUMENT_ROOT'] . '/api/config/db.php';
-require_once $_SERVER['DOCUMENT_ROOT'] . '/api/src/Validator.php';
-require_once $_SERVER['DOCUMENT_ROOT'] . '/api/auth/Token.php';
-require_once $_SERVER['DOCUMENT_ROOT'] . '/api/src/Database.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/api/src/init.php';
 
 $url_arr = explode('/', $_GET['q']);
 $request_method = $_SERVER['REQUEST_METHOD'];
 $raw_data = file_get_contents('php://input');
 $data = !empty($raw_data) ? json_decode($raw_data, 1) : null;
+
+$user_token = $_SERVER['HTTP_MY_CUSTOM_TOKEN'];
+$user_id = $_COOKIE['user_id'];
 
 switch ($url_arr[0]) {
     case 'api':
@@ -15,8 +15,7 @@ switch ($url_arr[0]) {
         switch ($request_method) {
             case "GET":
                 if (!empty($url_arr[2])) {
-                    $user_token = $_SERVER['HTTP_MY_CUSTOM_TOKEN'];
-                    $user_id = $_COOKIE['user_id'];
+
                     if(!ApiController::isUserAuth($user_token, $user_id)){
                         echo response(401, 'Not Authorized');
                         exit;
@@ -30,6 +29,11 @@ switch ($url_arr[0]) {
                 break;
             case "POST":
                 if (empty($url_arr[2])) {
+
+                    if(!ApiController::isUserAuth($user_token, $user_id)){
+                        echo response(401, 'Not Authorized');
+                        exit;
+                    }
 
                     print_r($data);
                     $login = $data['login'];
@@ -48,13 +52,13 @@ switch ($url_arr[0]) {
                 }
                 break;
             case "PATCH":
-//                if (!empty($url_arr[2])) {
-//                    $id = $url_arr[2];
-//                    is_numeric($id) ? ApiController::updateUser($id, $data) : null;
-//                }
-//                break;
             case "PUT":
                 if (!empty($url_arr[2])) {
+
+                    if(!ApiController::isUserAuth($user_token, $user_id)){
+                        echo response(401, 'Not Authorized');
+                        exit;
+                    }
                     $id = $url_arr[2];
 
                     $response = is_numeric($id) ? ApiController::updateUser($id, $data, $request_method) : null;
@@ -66,6 +70,12 @@ switch ($url_arr[0]) {
                 break;
             case "DELETE":
                 if (!empty($url_arr[2])) {
+
+                    if(!ApiController::isUserAuth($user_token, $user_id)){
+                        echo response(401, 'Not Authorized');
+                        exit;
+                    }
+
                     $id = $url_arr[2];
                     $result = is_numeric($id) ? ApiController::deleteUser($id) : null;
                     echo $result;
