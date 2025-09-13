@@ -51,6 +51,7 @@ class Token
         $calculated_hash_token = Token::hashToken($plain_token);
         $stored_hash_token = Token::getUserToken($user_id);
         $isValid = false;
+        if(empty($stored_hash_token)) return false;
         foreach($stored_hash_token as $item){
             $isValid |= hash_equals($item['token'], $calculated_hash_token) && time() < $item['expires_at'];
         }
