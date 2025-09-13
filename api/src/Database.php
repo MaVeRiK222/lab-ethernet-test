@@ -33,15 +33,15 @@ class Database
     public static function execute($query, $var_types_string, $params)
     {
         $stmt = self::$instance->prepare($query);
-        if (!$stmt) {
+        if (is_bool($stmt) && !$stmt) {
             throw new Exception("Prepare failed: " . self::$instance->error . " | Query: " . $query);
         }
-        $stmt->bind_param($var_types_string, ...$params);
-        if (!$stmt) {
+        $bind_bool = $stmt->bind_param($var_types_string, ...$params);
+        if (!$bind_bool) {
             throw new Exception("Bind param failed: " . self::$instance->error . " | Query: " . $query);
         }
-        $stmt->execute();
-        if (!$stmt) {
+        $execute_bool = $stmt->execute();
+        if (!$execute_bool) {
             throw new Exception("Execute failed: " . self::$instance->error . " | Query: " . $query);
         }
         $query_type = strtoupper(strtok(trim($query), " "));
