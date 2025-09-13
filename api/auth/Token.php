@@ -3,8 +3,6 @@ require_once $_SERVER['DOCUMENT_ROOT'] . '/api/src/Database.php';
 
 class Token
 {
-    private static string $server_salt = 'osNbO4U9h6nlFatPAI8ufsP2il5A9Tz8';
-
     private static function hashToken($plain_token)
     {
         return hash('sha256', $plain_token . Token::$server_salt);
