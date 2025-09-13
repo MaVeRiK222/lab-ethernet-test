@@ -42,11 +42,12 @@ class ApiController
 
     public static function updateUser($id, $data, $request_type)
     {
-        $users_columns_list = ['login', 'password_hash', 'email'];
+        $users_columns_list = ['login', 'password_hash', 'email', 'age'];
         $sql_query = "UPDATE users SET ";
         $params = [];
         $var_types_string = "";
         $data['password_hash'] = password_hash($data['password_hash'], PASSWORD_DEFAULT);
+        unset($data['pass']);
         $update_string = '';
         if ($request_type == "PATCH") {
 
