@@ -115,7 +115,7 @@ class ApiController
     {
         $response = ['code' => $code];
         if (empty($data)) {
-            $response['data'] = 'empty';
+            $response['data'] = [];
         } else {
             $response['data'] = $data;
         }
