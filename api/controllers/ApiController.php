@@ -18,7 +18,7 @@ class ApiController
         return ApiController::getResponse(null, 400, 'id ресурса должен быть числом');
     }
 
-    public static function createUser($login, $pass, $email)
+    public static function createUser($login, $pass, $email, $age=null)
     {
         $cant_create = false;
         $message = 'Такой пользователь уже существует.';
@@ -33,11 +33,11 @@ class ApiController
         }
         if ($cant_create) return ApiController::getResponse([], 200, $message);
 
-        $sql_query = "INSERT INTO users (login, password_hash, email) VALUES (?, ?, ?)";
+        $sql_query = "INSERT INTO users (login, password_hash, email, age) VALUES (?, ?, ?, ?)";
         $hash_pass = password_hash($pass, PASSWORD_DEFAULT);
-        $params = [$login, $hash_pass, $email];
+        $params = [$login, $hash_pass, $email, $age];
         Database::getInstance();
-        $result = Database::execute($sql_query, 'sss', $params);
+        $result = Database::execute($sql_query, 'ssss', $params);
         return ApiController::getResponse(['created_id' => $result], 201, 'Создание успешно');
     }
 
