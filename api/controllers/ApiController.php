@@ -94,8 +94,8 @@ class ApiController
         $params = [$id];
         Database::getInstance();
         $affected_rows = Database::execute($sql_query, 'i', $params);
-        return $affected_rows > 0 ? ApiController::getResponse($affected_rows, 200, 'Удаление успешно') :
-            ApiController::getResponse($affected_rows, 200, 'Не было удалено ни одной строки');
+        return $affected_rows > 0 ? ApiController::getResponse($affected_rows, 204, 'Удаление успешно') :
+            ApiController::getResponse($affected_rows, 404, 'Не было удалено ни одной строки');
     }
 
     public static function login($login, $pass)
