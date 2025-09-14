@@ -26,10 +26,10 @@
     {
         "code": "200"
         "data": [
-                    "id": 1,
-                    "login": "login",
-                    "email": "email@mail.com",
-                    "age": "age"
+                    "id": :id,
+                    "login": :login,
+                    "email": :email,
+                    "age": :age
                 ] 
     }
 
@@ -83,7 +83,7 @@
         "login": :login
         "email": :email
         "pass": :pass
-        "age": :age - Может отсутствовать
+        "age": :age
     }
 
 Ответ на валидный запрос на изменение
