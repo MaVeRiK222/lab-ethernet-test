@@ -11,7 +11,7 @@ class Validator
     public static function isLoginValid($login)
     {
         if (empty($login)) return false;
-        return preg_match('/^[a-z0-9]{3,50}$/', $login);
+        return preg_match('/^[a-z0-9]{3,50}$/i', $login);
     }
 
     public static function isPassValid($password)
