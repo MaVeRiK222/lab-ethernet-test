@@ -22,7 +22,7 @@ if ($url_arr[1] === 'users') {
                     }
                     $id = $url_arr[2];
 
-                    $response = ApiController::getUser($id);
+                    $response = is_numeric($id) ? ApiController::getUser($id) : Response::getJsonResponse(404, 'id ресурса должен быть числом');
                 } catch (Exception $e) {
                     Logger::log('Ошибка при получении пользователя', 'route.log', $e->getMessage());
                     Response::getJsonResponse(500, 'Server Error');
@@ -56,7 +56,7 @@ if ($url_arr[1] === 'users') {
                 }
             } catch (Exception $e) {
                 Logger::log('Ошибка при создании пользователя', 'route.log', $e->getMessage());
-                Response::getJsonResponse(500, 'Server Error');
+                echo Response::getJsonResponse(500, 'Server Error');
             }
             break;
         case "PATCH":
@@ -75,20 +75,21 @@ if ($url_arr[1] === 'users') {
 
                     if (($request_method === "PATCH" && !isPatchValid($email, $login, $pass, $age)) ||
                         $request_method === "PUT" && !isPutValid($email, $login, $pass, $age)){
-                        Response::getJsonResponse(200, 'Неверные данные');
+                        echo Response::getJsonResponse(200, 'Неверные данные');
                         logEnd();
                         exit;
                     }
                     $id = $url_arr[2];
 
-                    $response = is_numeric($id) ? ApiController::updateUser($id, $data, $request_method) : null;
+                    $response = is_numeric($id) ? ApiController::updateUser($id, $data, $request_method) : Response::getJsonResponse(404, 'id ресурсва должен быть числом');
                     echo $response;
                 } else {
                     echo Response::getJsonResponse(404, 'Not Found');
+                    exit;
                 }
             } catch (Exception $e) {
                 Logger::log('Ошибка при обновлении пользователя', 'route.log', $e->getMessage());
-                Response::getJsonResponse(500, 'Server Error');
+                echo Response::getJsonResponse(500, 'Server Error');
             }
             break;
         case "DELETE":
@@ -101,7 +102,7 @@ if ($url_arr[1] === 'users') {
                     }
 
                     $id = $url_arr[2];
-                    $response = is_numeric($id) ? ApiController::deleteUser($id) : null;
+                    $response = is_numeric($id) ? ApiController::deleteUser($id) : Response::getJsonResponse(404, 'id ресурса должен быть числом');
                     echo $response;
                 } else {
                     echo Response::getJsonResponse(404, 'Not Found');
