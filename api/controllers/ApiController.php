@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../src/Database.php';
 require_once __DIR__ . '/../auth/Token.php';
+require_once __DIR__ . '/../src/Validator.php';
 
 class ApiController
 {
@@ -8,7 +9,7 @@ class ApiController
     public static function getUser($id)
     {
         if (is_numeric($id)) {
-            $sql_query = "SELECT id, login, email FROM users WHERE id=?";
+            $sql_query = "SELECT id, login, email, age FROM users WHERE id=?";
             $params = [$id];
             Database::getInstance();
             $result = Database::execute($sql_query, 'i', $params);
@@ -43,14 +44,16 @@ class ApiController
     public static function updateUser($id, $data, $request_type)
     {
         $users_columns_list = ['login', 'password_hash', 'email', 'age'];
+        $pass = $data['pass'] ?? null;
         $sql_query = "UPDATE users SET ";
         $params = [];
         $var_types_string = "";
-        $data['password_hash'] = password_hash($data['password_hash'], PASSWORD_DEFAULT);
-        unset($data['pass']);
+        if (!empty($pass)) {
+            $data['password_hash'] = password_hash($pass, PASSWORD_DEFAULT);
+            unset($data['pass']);
+        }
         $update_string = '';
         if ($request_type == "PATCH") {
-
             $k = 0;
             foreach ($data as $key => $value) {
                 $k++;
