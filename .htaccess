@@ -1,0 +1,16 @@
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^(.+)$ route.php?q=$1 [L,QSA]
+
+RewriteRule ^api/ - [F]
+RewriteRule ^config/ - [F]
+RewriteRule ^src/ - [F]
+RewriteRule ^logs/ - [F]
+RewriteRule ^utils/ - [F]
+
+<FilesMatch "\.(env|ini|log|sh|sql|htaccess|htpasswd|yml|yaml|lock)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+Options -Indexes

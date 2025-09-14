@@ -1,9 +1,10 @@
 <?php
-require_once $_SERVER['DOCUMENT_ROOT'] . '/api/src/Database.php';
+require_once __DIR__ . '/../src/Database.php';
+require_once __DIR__ . '/../auth/config.php';
 
 class Token
 {
-    private static string $server_salt = 'osNbO4U9h6nlFatPAI8ufsP2il5A9Tz8';
+    private static $server_salt = SERVER_SALT;
 
     private static function hashToken($plain_token)
     {
@@ -20,16 +21,13 @@ class Token
         ];
     }
 
-    public static function storeToken($hash_token, $user_id, $expires_at){
+    public static function storeToken($hash_token, $user_id, $expires_at)
+    {
         $sql_query = "INSERT INTO tokens (user_id, token, expires_at) VALUES (?, ?, ?)";
         $params = [$user_id, $hash_token, $expires_at];
         $var_types_string = 'isi';
         Database::getInstance();
-        try {
-            $result = Database::execute($sql_query, $var_types_string, $params);
-        } catch(Exception $e){
-            echo 'Не сохранили';
-        }
+        $result = Database::execute($sql_query, $var_types_string, $params);
         return $result;
     }
 
@@ -51,8 +49,8 @@ class Token
         $calculated_hash_token = Token::hashToken($plain_token);
         $stored_hash_token = Token::getUserToken($user_id);
         $isValid = false;
-        if(empty($stored_hash_token)) return false;
-        foreach($stored_hash_token as $item){
+        if (empty($stored_hash_token)) return false;
+        foreach ($stored_hash_token as $item) {
             $isValid |= hash_equals($item['token'], $calculated_hash_token) && time() < $item['expires_at'];
         }
         return $isValid;
